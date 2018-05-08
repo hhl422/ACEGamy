@@ -7,6 +7,7 @@ import DataBus from './databus'
 
 let ctx = canvas.getContext('2d')
 let databus = new DataBus()
+let friendNum = 20;
 
 /**
  * 游戏主函数
@@ -52,7 +53,7 @@ export default class Main {
   enemyGenerate() {
     //if (databus.frame % 30 === 0) {
      // let enemy = databus.pool.getItemByClass('enemy', Enemy)
-      for (var i = 0; i < 7; i++){
+    for (var i = 0; i < friendNum; i++){
         let enemy = databus.pool.getItemByClass('enemy', Enemy)
         enemy.init(1)
         databus.enemys.push(enemy)
@@ -100,6 +101,7 @@ export default class Main {
 
       if (this.player.isCollideWith(enemy)) {
         enemy.playAnimation()
+        databus.score += 1
         //that.music.playExplosion()
         //databus.gameOver = true
 
@@ -149,11 +151,11 @@ export default class Main {
       }
     })
 
-    this.gameinfo.renderGameScore(ctx, databus.score)
+    this.gameinfo.renderGameScore(ctx, "好友存活数：" + (friendNum-databus.score))
 
     // 游戏结束停止帧循环
     if (databus.gameOver) {
-      this.gameinfo.renderGameOver(ctx, databus.score)
+      this.gameinfo.renderGameOver(ctx, "好友存活数：" + (friendNum - databus.score))
 
       if (!this.hasEventBind) {
         this.hasEventBind = true

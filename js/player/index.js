@@ -1,14 +1,14 @@
 import Sprite   from '../base/sprite'
-//import Bullet   from './bullet'
+import Bullet   from './bullet'
 import DataBus  from '../databus'
 
 const screenWidth    = window.innerWidth
 const screenHeight   = window.innerHeight
 
 // 玩家相关常量设置
-const PLAYER_IMG_SRC = 'images/hero.png'
-const PLAYER_WIDTH   = 80
-const PLAYER_HEIGHT  = 80
+const PLAYER_IMG_SRC = 'images/head1.png'
+const PLAYER_WIDTH   = 40
+const PLAYER_HEIGHT  = 40
 
 let databus = new DataBus()
 
@@ -23,7 +23,7 @@ export default class Player extends Sprite {
     // 用于在手指移动的时候标识手指是否已经在飞机上了
     this.touched = false
 
-    //this.bullets = []
+    this.bullets = []
 
     // 初始化事件监听
     this.initEvent()
@@ -112,15 +112,15 @@ export default class Player extends Sprite {
    * 玩家射击操作
    * 射击时机由外部决定
    */
-  // shoot() {
-  //   let bullet = databus.pool.getItemByClass('bullet', Bullet)
+  shoot() {
+    let bullet = databus.pool.getItemByClass('bullet', Bullet)
 
-  //   bullet.init(
-  //     this.x + this.width / 2 - bullet.width / 2,
-  //     this.y - 10,
-  //     10
-  //   )
+    bullet.init(
+      this.x + this.width / 2 - bullet.width / 2,
+      this.y - 10,
+      10
+    )
 
-  //   databus.bullets.push(bullet)
-  // }
+    databus.bullets.push(bullet)
+  }
 }

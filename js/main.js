@@ -4,11 +4,11 @@ import BackGround from './runtime/background'
 import GameInfo from './runtime/gameinfo'
 import Music from './runtime/music'
 import DataBus from './databus'
+import MyEnemy from './npc/myenemy'
 
 let ctx = canvas.getContext('2d')
 let databus = new DataBus()
-let friendNum = 20;
-
+var time
 /**
  * 游戏主函数
  */
@@ -27,13 +27,12 @@ export default class Main {
       'touchstart',
       this.touchHandler
     )
-
     this.bg = new BackGround(ctx)
+    this.enemyGenerate()
     this.player = new Player(ctx)
     this.gameinfo = new GameInfo()
     //this.music = new Music()
-    this.enemyGenerate()
-
+    this.time=setInterval(function () { upscore() }, 3000)
     this.bindLoop = this.loop.bind(this)
     this.hasEventBind = false
 
@@ -44,6 +43,7 @@ export default class Main {
       this.bindLoop,
       canvas
     )
+
   }
 
   /**
@@ -51,45 +51,38 @@ export default class Main {
    * 帧数取模定义成生成的频率
    */
   enemyGenerate() {
-    //if (databus.frame % 30 === 0) {
-     // let enemy = databus.pool.getItemByClass('enemy', Enemy)
-    for (var i = 0; i < friendNum; i++){
-        let enemy = databus.pool.getItemByClass('enemy', Enemy)
-        enemy.init(1)
-        databus.enemys.push(enemy)
-      }
-    //}
+    for (var i = 0; i < 15; i++) {
+      let enemy = databus.pool.getItemByClass('enemy', Enemy)
+      enemy.init(1)
+      databus.enemys.push(enemy)
+    }
+    // for (var i = 0; i < 3; i++) {
+    //   let enemy1 = databus.pool.getItemByClass('myenemy', MyEnemy)
+    //   enemy1.init(1)
+    //   databus.enemys.push(enemy1)
+    // }
   }
 
   // 全局碰撞检测
   collisionDetection() {
-    //let that = this
-    // databus.bullets.forEach((enemy1) => {
-    //   for (let i = 0, il = databus.enemys.length; i < il; i++) {
-    //     let enemy = databus.enemys[i]
 
-    //     if (!enemy.isPlaying && enemy.isCollideWith(enemy1)) {
-    //       enemy.playAnimation()
-    //       //that.music.playExplosion()
-
-    //       bullet.visible = false
-    //       databus.score += 1
-
-    //       break
-    //     }
-    //   }
-    // })
-    for (let i = 0, il = databus.enemys.length; i < il-1; i++) {
+    for (let i = 0, il = databus.enemys.length; i < il - 1; i++) {
       let enemy = databus.enemys[i]
-      for (let j = i+1;j<il;j++){
+      for (let j = i + 1; j < il; j++) {
         let enemy1 = databus.enemys[j]
         if (!enemy.isPlaying && enemy.isCollideBetween(enemy1)) {
+          var deltaX=(enemy.x-enemy1.x)/2/10
+          var deltaY=(enemy.y-enemy1.y)/2/10
+          enemy.x+=deltaX
+          enemy1.x -= deltaX
+          enemy.y += deltaY
+          enemy1.y -= deltaY
           var deltaXspeed = enemy.Xspeed - enemy1.Xspeed
           var deltaYspeed = enemy.Yspeed - enemy1.Yspeed
-          enemy.Xspeed = enemy.Xspeed - deltaXspeed
-          enemy1.Xspeed = enemy1.Xspeed + deltaXspeed
-          enemy.Yspeed = enemy.Yspeed - deltaYspeed
-          enemy1.Yspeed = enemy1.Yspeed + deltaYspeed
+          enemy.Xspeed = (enemy.Xspeed - deltaXspeed)
+          enemy1.Xspeed = (enemy1.Xspeed + deltaXspeed)
+          enemy.Yspeed = (enemy.Yspeed - deltaYspeed)
+          enemy1.Yspeed = (enemy1.Yspeed + deltaYspeed) 
 
           break
         }
@@ -99,14 +92,16 @@ export default class Main {
     for (let i = 0, il = databus.enemys.length; i < il; i++) {
       let enemy = databus.enemys[i]
 
-      if (this.player.isCollideWith(enemy)) {
+      if (this.player.isCollideBetween(enemy)) {
         enemy.playAnimation()
-        databus.score += 1
+        databus.death+=1
         //that.music.playExplosion()
-        //databus.gameOver = true
-
         break
       }
+    }
+    if (databus.enemys.length - databus.death == 3) {
+      clearInterval(this.time)
+      databus.gameOver = true
     }
   }
 
@@ -135,14 +130,9 @@ export default class Main {
 
     this.bg.render(ctx)
 
-    // databus.bullets
-    //   .concat(databus.enemys)
-    //   .forEach((item) => {
-    //     item.drawToCanvas(ctx)
-    //   })
     databus.enemys.forEach((item) => {
-         item.drawToCanvas(ctx)
-       })
+      item.drawToCanvas(ctx)
+    })
     this.player.drawToCanvas(ctx)
 
     databus.animations.forEach((ani) => {
@@ -151,11 +141,11 @@ export default class Main {
       }
     })
 
-    this.gameinfo.renderGameScore(ctx, "好友存活数：" + (friendNum-databus.score))
+    this.gameinfo.renderGameScore(ctx, databus.score)
 
     // 游戏结束停止帧循环
     if (databus.gameOver) {
-      this.gameinfo.renderGameOver(ctx, "好友存活数：" + (friendNum - databus.score))
+      this.gameinfo.renderGameOver(ctx, databus.score)
 
       if (!this.hasEventBind) {
         this.hasEventBind = true
@@ -172,23 +162,12 @@ export default class Main {
 
     this.bg.update()
 
-    // databus.bullets
-    //   .concat(databus.enemys)
-    //   .forEach((item) => {
-    //     item.update()
-    //   })
     databus.enemys
       .forEach((item) => {
         item.update()
       })
 
-
     this.collisionDetection()
-
-    // if (databus.frame % 20 === 0) {
-    //   //this.player.shoot()
-    //   //this.music.playShoot()
-    // }
   }
 
   // 实现游戏帧循环
@@ -203,4 +182,8 @@ export default class Main {
       canvas
     )
   }
+}
+function upscore(){
+  databus.score+=1
+  databus.s = databus.s*1.5
 }

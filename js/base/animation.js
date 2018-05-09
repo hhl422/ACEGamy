@@ -21,7 +21,7 @@ export default class Animation extends Sprite {
     this.loop = false
 
     // 每一帧的时间间隔
-    this.interval =10 / 60
+    this.interval = 1000 / 60
 
     // 帧定时器
     this[__.timer] = null

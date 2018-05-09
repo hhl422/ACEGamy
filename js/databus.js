@@ -7,7 +7,7 @@ let instance
  */
 export default class DataBus {
   constructor() {
-    if ( instance )
+    if (instance)
       return instance
 
     instance = this
@@ -18,12 +18,13 @@ export default class DataBus {
   }
 
   reset() {
-    this.frame      = 0
-    this.score      = 0
-    //this.bullets    = []
-    this.enemys     = []
+    this.frame = 0
+    this.score = 0
+    this.enemys = []
     this.animations = []
-    this.gameOver   = false
+    this.gameOver = false
+    this.s=1
+    this.death=0
   }
 
   /**
